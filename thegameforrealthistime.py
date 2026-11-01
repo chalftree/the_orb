@@ -9,7 +9,9 @@ dung_hp = 5
 dung_at = 1
 dung_df = 1
 dung_diff = 1
+dung_scale = 1.1
 dung_len = 30
+dung_len_var = 0
 
 game_state = 2
 combat = 1
@@ -30,17 +32,22 @@ class Player():
 
     def lvlup(self):
         self.lvl += 1
-        self.hp += random.randint(1,10)
+        self.hp += random.randint(1,8)
         self.at += random.randint(1,2)
         self.df += random.randint(1,2)
 
 player = Player()
 
+class Dungeon():
+    def __init__(self):
+        self.diff = dung_diff
+        self.hp = 1 + dung_diff * 2
+
 class Enemy():
     def __init__(self):
-        self.hp = random.randint(dung_hp, dung_hp + (dung_diff * 2 * player.lvl))
-        self.at = random.randint(dung_at, dung_at + (dung_diff * player.lvl))
-        self.df = random.randint(dung_df, dung_df + (dung_diff * player.lvl))
+        self.hp = random.randint(dung_hp + round(dung_len_var ** dung_scale), (dung_hp + round(dung_len_var ** dung_scale)) + (dung_diff * 2 * player.lvl))
+        self.at = random.randint(dung_hp + round(dung_len_var ** dung_scale), (dung_hp + round(dung_len_var ** dung_scale)) + (dung_diff * player.lvl))
+        self.df = random.randint(dung_hp + round(dung_len_var ** dung_scale), (dung_hp + round(dung_len_var ** dung_scale)) + (dung_diff * player.lvl))
 
     def hit(self,dmg):
         self.hp -= dmg
@@ -81,14 +88,15 @@ while True:
             game_state = new_enemy
 
     elif game_state == new_enemy:
-        if dung_len >= 0:
+        if dung_len_var != dung_len:
             game_state = combat
         else:
             game_state = idle
+            dung_len_var = 0
             continue
         enemy = Enemy()
         print(f'new enemy appears, max hp {enemy.hp}, atk {enemy.at}, def {enemy.df}')
-        dung_len -= 1
+        dung_len_var += 1
 
     elif game_state == death:
         print(f'died at level {player.lvl}')
